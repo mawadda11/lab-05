@@ -442,6 +442,93 @@ const data = [
     }
 ];
 
+const player_row = document.getElementById("player-rows");
+const search_input = document.getElementById("search");
+const team_filter = document.getElementById("team-filter");
+const dark_Mode_Btn = document.getElementById("dark-mode-toggle");
+
+function getTeamCode (team) {
+    let split = team.split("(");
+    return split[1].replace(")", "");
+}
+
+function populateTeams() {
+    let teams = [];
+    data.forEach(function(player) {
+        let team_code = getTeamCode(player.team);
+
+        if (teams.indexOf(team_code) === -1) {
+             teams.push(team_code);
+        }
+    });
+
+    teams.forEach(function(team) {
+        let option = document.createElement("option");
+        option.value = team;
+        option.textContent = team;
+        team_filter.appendChild(option);
+    });
+}
+
+
+function addCell(row, value) {
+    let cell = document.createElement("td");
+    cell.textContent = value;
+    row.appendChild(cell);
+}
+
+
+function displayPlayers(players) {
+    player_row.innerHTML = "";
+    players.forEach(function(player) {
+        let row = document.createElement("tr");
+        addCell(row, player.name);
+        addCell(row, getTeamCode(player.team));
+        addCell(row, player.points);
+        addCell(row, player.rebounds);
+        addCell(row, player.assists);
+        
+        player_row.appendChild(row);
+    });
+}
+
+
+function filterPlayers() {
+    let searchText = search_input.value.toUpperCase();
+    let selectedTeam = team_filter.value;
+
+    let filtered_Players = data.filter(function(player) {
+        let name_Matches = player.name.toUpperCase().includes(searchText);
+        let team_Matches = selectedTeam === "all" || getTeamCode(player.team) === selectedTeam;
+        return name_Matches && team_Matches;
+    });
+    displayPlayers(filtered_Players);
+}
+
+
+search_input.addEventListener("keyup", filterPlayers);
+team_filter.addEventListener("change", filterPlayers);
+
+let dark_mode = function() {document.body.classList.toggle("dark-mode");};
+dark_Mode_Btn.addEventListener("click", dark_mode);
+
+player_row.addEventListener("mouseover", function(event) {
+    let row = event.target.closest("tr");
+    if (row) {
+        row.style.backgroundColor = "lightgray";
+    }
+});
+
+player_row.addEventListener("mouseout", function(event) {
+    let row = event.target.closest("tr");
+
+    if (row) {
+        row.style.backgroundColor = "";
+    }
+});
+
+populateTeams();
+displayPlayers(data);
 
 
 
